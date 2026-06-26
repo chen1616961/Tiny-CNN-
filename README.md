@@ -22,7 +22,7 @@ ship_part
 - 默认输入尺寸：`128x128 RGB`
 - 默认推理间隔：`0 ms`
 - 已完成 `idf.py build`
-- 已生成 S/M/L/XL 四个固件变体
+- 已生成 S/M/L/XL/XL-Deep 五个固件变体
 - `/api/status`、`/api/config`、`/api/recognition?method=tinycls` 保留
 - `/api/validate/run` 已支持 `method=tinycls`
 - Tiny CNN 实时路径使用摄像头 raw frame 同步处理，不再走 YOLO 的 JPEG queue、bbox、NMS 路径
