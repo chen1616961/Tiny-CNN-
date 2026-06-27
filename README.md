@@ -4,7 +4,7 @@
 
 本版本将默认识别路线切换为 Tiny CNN 海洋目标分类器。模型不再输出检测框，而是直接输出 `label / score / top_k / inference_ms / analysis_ms`，识别任务从“检测目标位置”改为“判断当前画面或中心裁剪区域属于哪一类海面目标”。这样可以保留原工程的摄像头、Web 控制台、NVS 配置、状态 API、历史记录和网络框架，同时显著降低端侧推理计算量。
 
-当前默认模型为 `TinyCNN-M`，类别为：
+当前默认模型为 `TinyCNN-XL-Deep`，类别为：
 
 ```text
 unknown
@@ -18,11 +18,11 @@ ship_part
 ## 当前状态
 
 - 默认识别方法：`tinycls`
-- 默认模型：`models/tiny_cls_m_128_6cls_s8_p4.espdl`
-- 默认输入尺寸：`128x128 RGB`
+- 默认模型：`models/tiny_cls_xl_deep_192_6cls_s8_p4.espdl`
+- 默认输入尺寸：`192x192 RGB`
 - 默认推理间隔：`0 ms`
 - 已完成 `idf.py build`
-- 已生成 S/M/L/XL/XL-Deep 五个固件变体
+- 已生成 S/M/L/XL 四个固件变体
 - `/api/status`、`/api/config`、`/api/recognition?method=tinycls` 保留
 - `/api/validate/run` 已支持 `method=tinycls`
 - Tiny CNN 实时路径使用摄像头 raw frame 同步处理，不再走 YOLO 的 JPEG queue、bbox、NMS 路径
@@ -38,7 +38,7 @@ docs/                         中文说明文档
 data/                         本地训练数据目录，通常不上传完整大数据集
 reports/                      训练报告和采样报告
 release/firmware_variants/    S/M/L/XL/XL-Deep 固件变体
-build/                        当前默认 M 模型构建产物
+build/                        当前默认 XL-Deep 模型构建产物
 README.md                     项目总说明
 ```
 
@@ -59,7 +59,7 @@ sdkconfig.defaults
 | 版本 | 输入 | 参数量 | valid_acc | test_acc | `.espdl` 大小 | 用途 |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
 | TinyCNN-S | 96x96 | 8,270 | 92.88% | 91.25% | 25,648 B | 速度 baseline |
-| TinyCNN-M | 128x128 | 16,382 | 96.91% | 95.67% | 36,400 B | 默认推荐 |
+| TinyCNN-M | 128x128 | 16,382 | 96.91% | 95.67% | 36,400 B | 均衡推荐 |
 | TinyCNN-L | 160x160 | 28,054 | 97.82% | 96.55% | 50,896 B | 精度优先 |
 | TinyCNN-XL | 192x192 | 51,622 | 98.38% | 97.41% | 78,480 B | 大模型对比 |
 | TinyCNN-XL-Deep | 192x192 | 270,342 | 96.42% | 94.12% | 338,592 B | 加深加宽实验版 |
@@ -68,8 +68,8 @@ sdkconfig.defaults
 
 ```ini
 CONFIG_APP_DEFAULT_RECOGNITION_METHOD=5
-CONFIG_APP_TINY_CLS_MODEL_FILE="../models/tiny_cls_m_128_6cls_s8_p4.espdl"
-CONFIG_APP_TINY_CLS_INPUT_SIZE=128
+CONFIG_APP_TINY_CLS_MODEL_FILE="../models/tiny_cls_xl_deep_192_6cls_s8_p4.espdl"
+CONFIG_APP_TINY_CLS_INPUT_SIZE=192
 CONFIG_APP_INFERENCE_INTERVAL_MS=0
 ```
 
@@ -101,7 +101,7 @@ release/firmware_variants/partition-table.bin
 release/firmware_variants/flash_args_tinycnn_m
 ```
 
-当前普通构建目录里的应用固件仍是推荐的 M 版本：
+当前普通构建目录里的应用固件以当前配置为准；切到 XL-Deep 后需要重新运行 `idf.py build`：
 
 ```text
 build/esp32p4_buoy_vision_lab.bin
@@ -157,13 +157,11 @@ python -m esptool --chip esp32p4 -p COM3 -b 460800 `
 
 把最后一个 app bin 换成 `tinycnn_s/m/l/xl/xl_deep.bin`，即可烧录不同模型版本。
 
-如果只想上板对比 XL-Deep，直接把 app bin 换成
-`release\firmware_variants\esp32p4_buoy_vision_lab_tinycnn_xl_deep.bin`。如果要让源码工程默认编译为
-XL-Deep，再修改配置并重新构建：
+如果要回到 M 版本，可以把配置改回：
 
 ```ini
-CONFIG_APP_TINY_CLS_MODEL_FILE="../models/tiny_cls_xl_deep_192_6cls_s8_p4.espdl"
-CONFIG_APP_TINY_CLS_INPUT_SIZE=192
+CONFIG_APP_TINY_CLS_MODEL_FILE="../models/tiny_cls_m_128_6cls_s8_p4.espdl"
+CONFIG_APP_TINY_CLS_INPUT_SIZE=128
 ```
 
 ## Web 页面和 API
